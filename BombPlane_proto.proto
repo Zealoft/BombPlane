@@ -1,0 +1,260 @@
+syntax = "proto3";
+package bombplane_proto; //定义protobuf的包名称空间,对应C++,C#的namespace,Java的package
+
+// 为了在沈坚服务器上编译通过，使用lite版本
+// 只有一个区别：用不了DebugString
+option optimize_for = LITE_RUNTIME;
+
+// request      -- need reply(response)
+// notification -- no reply needed
+// broadcast    -- no reply needed
+
+enum Type
+{
+    UNKNOWN                     = 0;    // protobuf默认枚举需从0开始
+
+
+    // KeepAlive
+
+    QUIT_NOTIFICATION           = 101;  // C->S: 客户端关闭窗口或网络异常
+
+    KEEPALIVE_REQUEST           = 102;  // C->S: 客户端心跳
+    KEEPALIVE_RESPONSE          = 103;  // S->C: 服务器心跳回复,是否需要？
+    
+    KICK_NOTIFICATION           = 104;  // S->C: 同id用户登录，踢旧登录
+    ERROR_NOTIFICATION          = 105;  // S->C: 用户报文出现异常
+
+
+    // Login
+
+    LOGIN_REQUEST               = 201;  // C->S: 登录请求
+    LOGIN_RESPONSE              = 202;  // S->C: 登录回复
+
+    ONLINELIST_NOTIFICATION     = 203;  // S->C: 为新登录的用户发送所有在线用户的列表
+    UPDATEONLINE_BROADCAST      = 204;  // S->allC: 单个用户的上线或下线需要对所有用户发送
+
+
+    // Invite
+
+    INVITE_REQUEST              = 301;  // C1->S->C2: A点击B进行邀请,服务器需要转发
+    INVITE_RESPONSE             = 302;  // C2->S->C1: B接收A的邀请,服务器需要转发
+                                        //            以下操作为A发送邀请后立刻掉线的容错：
+                                        //            客户端B发送完此包后进入计时状态
+                                        //            服务器接收到此包先判断A客户端的合法情况（是否在线等）
+                                        //                 若合法,发送 ROOMREADY_NOTIFICATION
+                                        //                       再广播 UPDATEROOM_BROADCAST
+                                        //                 若不合法,B一段时间后提示超时
+                                        //            以上是否需要更改？
+
+    UPDATEROOM_BROADCAST        = 303;  // S->allC: 服务器对所有用户发送“AB进入或退出房间”的消息
+                                        //          发送“进入”的时机：服务器收到C1的 INVITE_REQUEST
+                                        //          发送“退出”的时机：服务器收到C1或者C2的 EXIT_REQUEST
+
+
+    // Game
+    INITPOS_NOTIFICATION        = 403;  // C1C2->S: 初始化设置飞机坐标
+    GAMESTART_NOTIFICATION      = 404;  // S->C1C2: 通知双方开始决斗
+
+    BOMB_REQUEST                = 405; // C1/C2->S: 单坐标轰炸
+    BOMB_RESPONSE               = 406; // S->C1C2: 向双方同时发送轰炸结果
+
+    GUESS_REQUEST               = 407; // C1/C2->S: 三坐标（整机）猜测
+    GUESS_RESPONSE              = 408; // S->C1C2: 向双方同时发送猜测结果
+
+    GAMEOVER_NOTIFICATION       = 409; // S->C1C2: 输赢结束
+    GAMECRUSH_NOTIFICATION      = 410; // S->C1C2: 异常结束
+
+    EXITGAME_NOTIFICATION       = 411; // C->S: 退出游戏（退出房间）
+}
+
+// 每个type对应一种消息，部分type有对应的body，其它则没有
+message Message
+{
+    Type type = 1;
+
+    oneof body
+    {
+        // Login
+
+        LoginRequest loginrequest                       = 201;
+        LoginResponse loginresponse                     = 202;
+
+        OnlinelistNotification onlinelistnotification   = 203;
+        UpdateonlineBroadcast updateonlinebroadcast     = 204;
+
+        // Invite
+
+        InviteRequest inviterequest                     = 301;
+        InviteResponse inviteresponse                   = 302;
+        UpdateroomBroadcast updateroombroadcast         = 303;
+
+        // Game
+
+        InitposNotification initposnotification         = 403;
+        GamestartNotification gamestartnotification     = 404;
+
+        BombRequest bombrequest                         = 405;
+        BombResponse bombresponse                       = 406;
+
+        GuessRequest guessrequest                       = 407;
+        GuessResponse guessresponse                     = 408;
+
+        GameoverNotification gameovernotification       = 409;
+        GamecrushNotification gamecrushnotification     = 410;
+    }
+}
+
+// Login
+
+// C->S: 登录请求
+message LoginRequest
+{
+    bytes username  = 1; // 用户名
+    bytes password  = 2; // 密码
+}
+
+// S->C: 登录回复
+message LoginResponse
+{
+	enum LoginState
+	{
+		SUCCESS         = 0; // 成功登录
+		SUCCESS_KICK    = 1; // 踢掉同名用户登录
+
+		NOT_EXIST       = 3; // 用户名不存在
+		WRONG_PASSWORD  = 4; // 密码不存在
+		SERVER_ERROR    = 5; // 其他（服务器内部错误）
+	}
+
+    LoginState state    = 1; // 登录回复的类型
+    int32 userid        = 2; // 服务器为用户分配的id
+}
+
+
+// 由OnlinelistNotification使用, 在线用户的信息
+message OnlineUser
+{
+    bytes username  = 1;
+    int32 userid    = 2;
+    bool  inroom    = 3; // 是否在房间中
+}
+
+// S->C: 为新登录的用户发送所有在线用户的列表
+message OnlinelistNotification
+{
+    repeated OnlineUser onlinelist  = 1;
+}
+
+// S->allC: 单个用户的上线或下线需要对所有用户发送
+message UpdateonlineBroadcast
+{
+    bytes username  = 1;
+    int32 userid    = 2;
+    bool  online    = 3;
+}
+
+
+// Invite
+
+// C1->S->C2: A点击B进行邀请,服务器转发
+message InviteRequest
+{
+    int32 srcuserid = 1; // 邀请者
+    int32 dstuserid = 2; // 被邀请者
+}
+
+// C2->S->C1: B接收A的邀请,服务器转发
+message InviteResponse
+{
+    int32 srcuserid = 1; // 邀请者的userid,服务器需检测此id是否在线
+    bool  accept    = 2;
+}
+
+// S->allC: 服务器对所有用户发送“AB进入或退出房间”的消息
+message UpdateroomBroadcast
+{
+    int32 userid1   = 1;
+    int32 userid2   = 2;
+    bool  inout     = 3; // in=true, out=false
+}
+
+
+// Game
+
+// 二维坐标结构
+message Coordinate
+{
+    int32 x = 1;
+    int32 y = 2;
+}
+
+// 飞机定位器,需要3个二维坐标定位一个飞机
+message PlaneLocator
+{
+    Coordinate pos1 = 1;
+    Coordinate pos2 = 2;
+    Coordinate pos3 = 3;
+}
+
+// C1C2->S: 初始化设置飞机坐标，共三个飞机
+message InitposNotification
+{
+    PlaneLocator loc1   = 1;
+    PlaneLocator loc2   = 2;
+    PlaneLocator loc3   = 3;
+}
+
+// S->C1C2: 通知双方开始决斗
+message GamestartNotification
+{
+    int32 userid = 1;   // 先手者
+}
+
+// C1/C2->S: 单坐标轰炸
+message BombRequest
+{
+    Coordinate pos  = 1;
+}
+
+// S->C1C2: 向双方同时发送轰炸结果
+message BombResponse
+{
+	enum BOMB_RESULT
+	{
+		MISS        = 0; // 未击中
+		HIT         = 1; // 击中机身
+		DESTORYED   = 2; // 击中机头
+	}
+    BOMB_RESULT res = 1; // 轰炸结果
+    Coordinate pos  = 2; // 轰炸位置
+}
+
+// C1/C2->S: 三坐标（整机）猜测
+message GuessRequest
+{
+    PlaneLocator loc    = 1; // 定位器,包含三个坐标
+}
+
+// S->C1C2: 向双方同时发送猜测结果
+message GuessResponse
+{
+    bool destroyed      = 1;
+    PlaneLocator loc    = 2;
+}
+
+// S->C1C2: 输赢结束
+message GameoverNotification
+{
+    int32 winnerid = 1; // 获胜者id
+}
+
+// S->C1C2: 异常结束
+message GamecrushNotification
+{
+	enum CrushReason
+	{
+		OPPONENT_OFF    = 0; // 对方离开房间或掉线
+		SERVER_ERROR    = 1; // 其他（服务器内部错误）
+	}
+    CrushReason reason = 1;
+}

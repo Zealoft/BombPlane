@@ -1,0 +1,334 @@
+﻿<Window x:Class="BombPlane_Client.Views.GameHallWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BombPlane_Client.Views"
+        mc:Ignorable="d"
+        Title="游戏大厅" Height="900" Width="1440"
+        PreviewKeyDown="GameHallWindow_KeyDown"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <SolidColorBrush x:Key="MyTransparentBackground" Color="#334455" Opacity="0.0" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Popup Name="EscPopup" IsOpen="False" Placement="Center">
+            <StackPanel Background="#e1f5fe" Width="117.464">
+                <Button Content="退出" Background="#00b0ff"
+                Foreground="White" Margin="10" FontSize="18"
+                Click="Quit_Button_Click"/>
+            </StackPanel>
+        </Popup>
+        <Popup Name="InvitePopup" IsOpen="False" StaysOpen="False"  Placement="Mouse" VerticalOffset="-20" HorizontalOffset="-25" AllowsTransparency="True">
+            <Border Padding="10">
+                <StackPanel Background="{StaticResource MyTransparentBackground}" >
+
+                    <!-- A bubble -->
+
+                    <!-- Chat bubble anchor -->
+                    <Path Margin="13 -1 15 0"
+          Data="M 0,10 L 8,0 L 16,10"
+          HorizontalAlignment="Left"
+          Fill="#e1f5fe">
+
+                        <Path.Effect>
+                            <DropShadowEffect BlurRadius="4" ShadowDepth="3" Color="#00b0ff" />
+                        </Path.Effect>
+
+                    </Path>
+
+                    <!-- Speech bubble rectangle -->
+                    <Border CornerRadius="10"
+             Panel.ZIndex="1"
+
+                Padding="8"
+                Margin="5 0 0 0"
+                Background="#e1f5fe"
+                    >
+
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="4" ShadowDepth="3" Color="#00b0ff" />
+                        </Border.Effect>
+
+                        <!-- Message text -->
+                        <Button VerticalAlignment="Center"
+             BorderThickness="0"
+             Background="Transparent"
+            Padding="5"
+            FontSize="16"
+            Content="邀请"
+            Click="Invite_Button_Click"
+                           />
+                    </Border>
+
+
+                    <!-- A bubble ends -->
+
+                </StackPanel>
+            </Border>
+
+        </Popup>
+
+        <Popup Name="InviteNotification" IsOpen="False" Placement="Center"
+           AllowsTransparency="true">
+            <StackPanel Margin="10" Background="Transparent">
+                <Border CornerRadius="15"
+          Panel.ZIndex="1"
+          Margin="5 0 0 0"
+          Background="#e1f5fe">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="4" ShadowDepth="3" Color="#00b0ff" />
+                    </Border.Effect>
+                    <DockPanel  Background="Transparent">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Message text -->
+                            <TextBlock VerticalAlignment="Center"
+                        TextWrapping="Wrap"
+                      Background="Transparent"
+                    Padding="5"
+                    FontSize="25"
+                    FontWeight="Bold"
+                    Text="提示" 
+                    Margin="20 15 0 0"
+              />
+                            <TextBlock TextWrapping="Wrap"
+                    VerticalAlignment="Center"
+                      Background="Transparent"
+                    Padding="5"
+                    FontSize="16"
+                    Grid.Row="1"
+                    Text="收到了来自用户n发来的游戏请求"
+                    Margin="25 15 25 0"
+                    Name="InviteNoti_Text"
+              />
+                            <Grid Background="Transparent" Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border CornerRadius="10"
+                      Panel.ZIndex="1"
+                      Padding="8"
+                      Margin="40 20 20 10"
+                      Background="#00b0ff"
+                      >
+                                    <Button BorderThickness="0"
+                        Background="Transparent"
+                      Padding="20 0 20 0"
+                      FontSize="13"
+                      Content="接受"
+                      Foreground="White"
+                      Click="Accept_Invite_Button_Click"
+                      >
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}"  BorderThickness="0">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+
+                                </Border>
+
+                                <Border CornerRadius="10"
+                      Panel.ZIndex="1"
+                      Padding="8"
+                      Margin="20 20 40 10"
+                      Background="#00b0ff"
+                      Grid.Column="2"
+                      >
+
+                                    <Button BorderThickness="0"
+                        Background="Transparent"
+                      Padding="20 0 20 0"
+                      FontSize="13"
+                      Content="拒绝"
+                      Foreground="White"
+                      Click="Deny_Invite_Button_Click">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}"  BorderThickness="0">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Border>
+                            </Grid>
+                        </Grid>
+
+                    </DockPanel>
+                </Border>
+
+            </StackPanel>
+        </Popup>
+        <Popup Name="MessageNotification" IsOpen="False" Placement="Center"
+           AllowsTransparency="true">
+            <StackPanel Margin="10" Background="Transparent">
+                <Border CornerRadius="15"
+                Panel.ZIndex="1"
+                Margin="5 0 0 0"
+                Background="#e1f5fe">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="4" ShadowDepth="3" Color="#00b0ff" />
+                    </Border.Effect>
+                    <DockPanel  Background="Transparent">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                    TextWrapping="Wrap"
+                    Background="Transparent"
+                Padding="5"
+                FontSize="25"
+                FontWeight="Bold"
+                Text="提示" 
+                Margin="20 15 0 0"/>
+                            <TextBlock TextWrapping="Wrap"
+                VerticalAlignment="Center"
+                    Background="Transparent"
+                Padding="5"
+                FontSize="16"
+                Grid.Row="1"
+                Margin="25 15 25 0"
+                Name="Message_Text"/>
+                      
+                    <Border CornerRadius="10"
+                      Panel.ZIndex="1"
+                      Padding="8"
+                      Margin="30 20 30 20"
+                      Grid.Row="2"
+                      Background="#00b0ff"
+                      >
+                        <Button BorderThickness="0"
+                        Background="Transparent"
+                      Padding="20 0 20 0"
+                      FontSize="13"
+                      Content="知道了"
+                      Foreground="White"
+                      Click="IKnow_Button_Click">
+                            <Button.Style>
+                                <Style TargetType="{x:Type Button}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type Button}">
+                                                <Border Background="{TemplateBinding Background}"  BorderThickness="0">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                    </Border>
+                </Grid>
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+        </Popup>
+        
+        <Grid Grid.Row="0" Grid.Column="0">
+            <ItemsControl Name="avatar_items">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <WrapPanel>
+                            <StackPanel Margin="10" MouseRightButtonUp="Invite_Menu_Action">
+                                <Image Source="../Assets/Images/avatar.png" Height="40" Width="40"/>
+                                <TextBlock Text="{Binding username}" FontSize="18" />
+                                <TextBlock Text="{Binding userID}" FontSize="0.1" />
+                            </StackPanel>
+                        </WrapPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+
+
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+          Text="在线列表" FontSize="18"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center" />
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Grid.Row="1">
+                <StackPanel
+                Name="online_list_stack"
+                CanVerticallyScroll="True"
+        Orientation="Vertical">
+                    <Border BorderBrush="Black" BorderThickness="1">
+                        <DataGrid Name="users_grid" AutoGenerateColumns="False"
+              SelectionUnit="FullRow" SelectionMode="Extended"
+              IsReadOnly="True" ItemsSource="{Binding NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" FontSize="16">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Width="*" Binding="{Binding userID, Mode=TwoWay, NotifyOnSourceUpdated=True}"/>
+                                <DataGridTextColumn Header="用户名" Width="2*" Binding="{Binding username, Mode=TwoWay, NotifyOnSourceUpdated=True}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="9*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+          Text="聊天大厅" FontSize="18" />
+            <TextBox Grid.Row="2" Grid.Column="0" FontSize="18" VerticalContentAlignment="Center"/>
+            <Button Grid.Row="2" Grid.Column="1" Content="发送" />
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <TextBlock FontSize="18" Text="我的资料"/>
+        </Grid>
+    </Grid>
+</Window>

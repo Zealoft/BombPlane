@@ -1,0 +1,139 @@
+﻿<Window x:Class="BombPlane_Client.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BombPlane_Client.Views"
+        mc:Ignorable="d"
+        Title="Bomb Plane" Height="768" Width="1280"
+        PreviewKeyDown="MainWindow_KeyDown"
+        ResizeMode="CanMinimize">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Popup Name="EscPopup" IsOpen="False" Placement="Center">
+            <StackPanel Background="#e1f5fe" Width="117.464">
+                <Button Content="投降" Background="#ff1744"  Foreground="White" Margin="10" FontSize="18"/>
+                <Button Content="退出" Background="#00b0ff" Foreground="White" Margin="10" FontSize="18"/>
+            </StackPanel>
+        </Popup>
+        <!-- Row 1 -->
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Padding="0 30 0 40"
+                Grid.Column="1" Grid.ColumnSpan="2" Name="GameStatus" 
+                       FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" Text="放置我方飞机" FontWeight="Bold"/>
+
+        </Grid>
+        <!-- Row 2 -->
+        <Border BorderBrush="Black" BorderThickness="2" 
+                Grid.Row="1" Grid.Column="0" Margin="20,0"
+                Width="500" Height="500" VerticalAlignment="Top">
+            <Canvas x:Name="Play_Ground" 
+                    MouseLeftButtonDown="Play_Ground_LeftMouseDown" 
+                    MouseRightButtonDown="Play_Ground_RightMouseDown" 
+                    MouseMove="Play_Ground_MouseMove"
+                    MouseEnter="Play_Ground_MouseEnter"
+                    MouseLeave="Play_Ground_MouseLeave" Width="496" Height="496"/>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="2" 
+                Grid.Row="1" Grid.Column="1" Margin="20,0"
+                Width="500" Height="500" VerticalAlignment="Top">
+            <Canvas x:Name="Play_Ground_Rival" Width="496" Height="496"
+                    MouseLeftButtonDown="Play_Ground_Rival_LeftMouseDown"
+                    MouseMove="Play_Ground_Rival_MouseMove"
+                    MouseEnter="Play_Ground_Rival_MouseEnter"
+                    MouseLeave="Play_Ground_Rival_MouseLeave"
+                    MouseRightButtonDown="Play_Ground_Rival_RightMouseDown"/>
+        </Border>
+
+        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,526,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+
+            </Grid.ColumnDefinitions>
+
+
+            <Button Cursor="Hand" Name="Submit_Button" Margin="240,0,240,40"  
+                    FontSize="20"
+                    Content="确 认"
+                    Opacity="1" Grid.Column="0" Click="Submit_Button_Click"  Foreground="White">
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="0" CornerRadius="20" Name="PART_Background"  Background="#00b0ff">
+                            <ContentPresenter Content="{TemplateBinding ContentControl.Content}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="UIElement.IsMouseOver" Value="True">
+                                <Setter Property="Border.Background" TargetName="PART_Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                                            <GradientStop Color="#64b5f6" Offset="0.0" />
+                                            <GradientStop Color="#90caf9" Offset="0.5" />
+                                            <GradientStop Color="#bbdefb" Offset="0.0" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="ButtonBase.IsPressed" Value="True">
+                                <Setter Property="UIElement.Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="10" Color="Black" Direction="0" Opacity="0.6" RenderingBias="Performance" ShadowDepth="0" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+
+            <Button Cursor="Hand" Name="Send_Button" Margin="240,0,240,40"  
+                    FontSize="20"
+                    Content="确 认"
+                    Opacity="1" Grid.Column="1" Click="Send_Button_Click"  Foreground="White">
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="0" CornerRadius="20" Name="PART_Background"  Background="#00b0ff">
+                            <ContentPresenter Content="{TemplateBinding ContentControl.Content}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="UIElement.IsMouseOver" Value="True">
+                                <Setter Property="Border.Background" TargetName="PART_Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                                            <GradientStop Color="#64b5f6" Offset="0.0" />
+                                            <GradientStop Color="#90caf9" Offset="0.5" />
+                                            <GradientStop Color="#bbdefb" Offset="0.0" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="ButtonBase.IsPressed" Value="True">
+                                <Setter Property="UIElement.Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="10" Color="Black" Direction="0" Opacity="0.6" RenderingBias="Performance" ShadowDepth="0" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,1 @@
+protoc --cpp_out=src --proto_path=.. ../BombPlane_proto.proto
